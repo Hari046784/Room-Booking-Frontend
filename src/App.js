@@ -1,24 +1,77 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Navigate, Route } from 'react-router-dom';
+import Home from './pages/home/Home';
+import Rooms from './pages/rooms/Rooms';
+import GuestRoom from './pages/guestRoom/GuestRoom';
+import OwnerSignup from './pages/owner/OwnerSignup';
+import Signin from './pages/owner/Signin';
+import Signup from './pages/guest/Signup';
+import GuestSignin from './pages/guest/Signin';
+import { hotelColumns, roomColumns } from './datatablesource';
+import List from './pages/list/List';
+import { OwnerAuthContext } from './context/OwnerAuthContext';
+import NewHome from './pages/newHome/NewHome';
+import NewRoom from './pages/newRoom/NewRoom';
+import { useContext } from 'react';
+
 
 function App() {
+  const ProtectedRoute = ({ children }) => {
+    const { owner } = useContext(OwnerAuthContext);
+
+    if (!owner) {
+      return <Navigate to='/owner-signin' />;
+    }
+
+    return children;
+  };
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/rooms' element={<Rooms />} />
+        <Route path='/room/:id' element={<GuestRoom />} />
+        <Route path='/owner-signup' element={<OwnerSignup />} />
+        <Route path='/owner-signin' element={<Signin />} />
+        <Route path='/guest-signup' element={<Signup />} />
+        <Route path='/guest-signin' element={<GuestSignin />} />
+
+        <Route path='/home/ownerHomes'>
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <List columns={hotelColumns} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='new'
+            element={
+              <ProtectedRoute>
+                <NewHome />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+        <Route path='/room/ownerRooms'>
+          <Route
+            index
+            element={
+              <ProtectedRoute>
+                <List columns={roomColumns} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path='new'
+            element={<ProtectedRoute>{<NewRoom />}</ProtectedRoute>}
+          />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
 
